@@ -1,0 +1,71 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using it
+@using it.Areas.Admin.Models
+@addTagHelper *, it
+@inject it.Data.ItContext _context
+@inject UserManager<UserModel> userManager;
+@{
+    var user = await userManager.GetUserAsync(User);
+    var is_admin = await userManager.IsInRoleAsync(user, "Administrator");
+    var department_id = user.department_id;
+    var plans = _context.PlanModel.Where(d => d.deleted_at == null && d.department_id == user.department_id).ToList();
+}
+<div class="left-sidenav">
+    <ul class="metismenu left-sidenav-menu">
+
+
+        <li>
+            <a href="/admin">
+                <i class="ti-bar-chart"></i>
+                <span>Tổng quan</span>
+            </a>
+        </li>
+        <!--
+        <li>
+            <a href="/admin/schedule">
+                <i class="fas fa-layer-group"></i>
+                <span>Kế hoạch</span>
+                <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
+            </a>
+            <ul class="nav-second-level" aria-expanded="false">
+                <li class="nav-item"><a class="nav-link" href="/admin/user"><i class="ti-control-record"></i>Tài khoản</a></li>
+            </ul>
+        </li>
+        -->
+        @if (plans.Count > 0)
+        {
+            <li>
+                <a href="javascript: void(0);">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Kế hoạch</span>
+                    <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
+                </a>
+
+                <ul class="nav-second-level" aria-expanded="false">
+                    @foreach (var plan in plans)
+                    {
+                        <li class="nav-item"><a class="nav-link" href="/admin/planfile/index/@plan.id"><i class="ti-control-record"></i>@plan.name</a></li>
+                    }
+                </ul>
+            </li>
+        }
+        @if (is_admin)
+        {
+            <li>
+                <a href="javascript: void(0);">
+                    <i class="fas fa-cog"></i>
+                    <span>Hệ thống</span>
+                    <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
+                </a>
+
+                <ul class="nav-second-level" aria-expanded="false">
+                    <li class="nav-item"><a class="nav-link" href="/admin/user"><i class="ti-control-record"></i>Tài khoản</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin/role"><i class="ti-control-record"></i>Phân quyền</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin/department"><i class="ti-control-record"></i>Bộ phận</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin/plan"><i class="ti-control-record"></i>Kế hoạch</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin/equipment"><i class="ti-control-record"></i>Danh sách thiết bị</a></li>
+                </ul>
+            </li>
+        }
+    </ul>
+</div>

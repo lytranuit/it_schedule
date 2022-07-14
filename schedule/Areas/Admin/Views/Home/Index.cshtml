@@ -1,0 +1,336 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using it.Areas.Admin.Models
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+@inject UserManager<UserModel> userManager;
+@{
+    Layout = "_Admin";
+
+    var user = await userManager.GetUserAsync(User);
+    var department_id = user.department_id;
+}
+
+
+<link href="/lib/kendo/kendo.bootstrap-main.min.css" rel="stylesheet" type="text/css" />
+<div class="row justify-content-center">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-6 mt-2">
+                            <b class="col-form-label">Thiết bị:</b>
+                            <div class="pt-1">
+                                @Html.DropDownList("equipment_select", (IEnumerable<SelectListItem>)ViewData["equipments"], new {data_placeholder = "Select" })
+                            </div>
+                        </div>
+                        <div class="col-lg-6 mt-2">
+                            <b class="col-form-label">Bộ phận:</b>
+                            <div class="pt-1">
+                                @Html.DropDownList("departments[]", (IEnumerable<SelectListItem>)ViewData["departments"], new {multiple=true,data_placeholder = "Select",@class="multi_select" })
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end card-body-->
+            </div><!--end card-->
+        </div><!--end col-->
+
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div id="example">
+                        <div id="scheduler"></div>
+                    </div>
+                </div><!--end card-body-->
+            </div><!--end card-->
+        </div><!--end col-->
+
+    </div>
+
+</div>
+@section Scripts {
+<script src="/lib/kendo/kendo.all.min.js"></script>
+<script src="/lib/kendo/kendo.timezones.min.js"></script>
+
+<template id="editor">
+    <div class="row">
+        <div class="col-12">
+            <label for="title">Tiêu đề<i class="text-danger">*</i></label>
+            <div data-container-for="title">
+                <input type="text" data-role="textbox" name="title" required="required" data-bind="value:title">
+            </div>
+        </div>
+        <div class="col-6">
+            <label for="start">Bắt đầu<i class="text-danger">*</i></label>
+            <div data-container-for="start">
+                <input type="text"
+                       data-role="datetimepicker"
+                       data-interval="15"
+                       data-type="date"
+                       data-bind="value:start"
+                       name="start" />
+                <span data-for="start" class="k-invalid-msg" style="display: none;"></span>
+            </div>
+        </div>
+        <div class="col-6">
+            <label for="end">Kết thúc<i class="text-danger">*</i></label>
+            <div data-container-for="end" class="">
+                <input type="text" data-type="date" data-role="datetimepicker" data-bind="value:end" name="end" data-datecompare-msg="End date should be greater than or equal to the start date" />
+                <span data-for="end" class="k-invalid-msg" style="display: none;"></span>
+            </div>
+        </div>
+        <div class="col-12">
+            <label for="recurrenceRule">Lặp lại</label>
+            <div data-container-for="recurrenceRule">
+                <div data-bind="value:recurrenceRule" name="recurrenceRule" data-role="recurrenceeditor"></div>
+            </div>
+        </div>
+
+        <div class="col-4">
+            <label for="plan_id">Kế hoạch</label>
+            <div data-container-for="plan_id">
+                @Html.DropDownList("plan_id", (IEnumerable<SelectListItem>)ViewData["plans"], new {data_placeholder = "Select",@class="form-control form-control-sm" })
+            </div>
+        </div>
+
+        <div class="col-4">
+            <label for="date_plan">Ngày dự kiến</label>
+            <div data-container-for="date_plan">
+                <input type="text"
+                       data-role="datepicker"
+                       data-type="date"
+                       data-bind="value:date_plan"
+                       name="date_plan" />
+                <span data-for="date_plan" class="k-invalid-msg" style="display: none;"></span>
+            </div>
+        </div>
+        <div class="col-4">
+            <label for="type_plan">Loại</label>
+            <div data-container-for="type_plan">
+                <select class="form-control form-control-sm" name='type_plan'>
+                    <option value="W">Hàng tuần</option>
+                    <option value="M" selected>Hàng tháng</option>
+                    <option value="Q">Quí</option>
+                    <option value="H">Nữa năm</option>
+                    <option value="Y">Hàng năm</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-12">
+            <label for="description">Mô tả</label>
+            <div data-container-for="description">
+                <textarea name="description" data-role="textarea" rows="2" data-bind="value:description"></textarea>
+            </div>
+        </div>
+    </div>
+    <div data-container-for="equipment_id" class="k-edit-field">
+        <input type="hidden" name="equipment_id" id="equipment_id" data-bind="value:equipment_id" data-value-field="value" data-text-field="text" />
+    </div>
+
+    <div data-container-for="department_id" class="k-edit-field">
+        <input type="hidden" name="department_id" id="department_id" data-bind="value:department_id" data-value-field="value" data-text-field="text" />
+    </div>
+</template>
+<script>
+    var equipments = @Html.Raw(Json.Serialize(ViewData["equipments"]));
+    var departments = @Html.Raw(Json.Serialize(ViewData["departments"]));
+    var department_id = @department_id;
+    var equipment_id = localStorage.getItem('equipment_id') || "1";
+    $(document).ready(function(){
+        var equipment_id = localStorage.getItem('equipment_id');
+        if(equipment_id > 0)
+            $("[name='equipment_select']").val(equipment_id);
+        $("[name='equipment_select']").change(function (e) {
+            var val = $(this).val();
+            localStorage.setItem('equipment_id', val);
+            schedule_filter();
+        });
+        $("[name='departments[]']").change(function (e) {
+            schedule_filter();
+        });
+        $("#equipment_select").multiselect({
+            enableFiltering:true,
+            buttonWidth:"100%"
+        });
+        $("#scheduler").kendoScheduler({
+            date: new Date(),
+            height: 600,
+            editable:true,
+            editable: {
+                template: $("#editor").html(),
+                editRecurringMode:function (e) {
+                    console.log(e);
+                    if (e.department_id != department_id) {
+                         return false;
+                    }
+                    return "dialog";
+                },
+                window:{
+                    size:"medium",
+                    position: {
+                        top: 20, // or "100px"
+
+                    }
+                }
+            },
+            views: [
+                {
+                    type: "timelineWeek", title:'Timeline'
+                },
+                { type: "day" },
+                { type: "week" },
+                { type: "month", selected: true },
+                { type: "agenda", title: "Agenda" }
+            ],
+            add:function(e){
+                e.event.isAllDay = false;
+                if(e.event.start.getTime() == e.event.end.getTime()){
+                     e.event.end.setTime(e.event.end.getTime() + 1 * 60 * 60 * 1000);
+                }
+                e.event.equipment_id = $("[name='equipment_select']").val();
+                e.event.department_id = department_id;
+                e.event.date_plan = moment(e.event.start).format("YYYY-MM-DD");
+            },
+            edit:function(e){
+                if(e.event.department_id != department_id){
+                     e.preventDefault();
+                }
+            },
+            remove:function(e){
+                if(e.event.department_id != department_id){
+                     e.preventDefault();
+                }
+            },
+            resize:function(e){
+                if(e.event.department_id != department_id){
+                     e.preventDefault();
+                }
+            },
+            moveStart:function(e){
+                console.log(e);
+                if(e.event.department_id != department_id){
+                     e.preventDefault();
+                }
+            },
+            timezone: "Asia/Ho_Chi_Minh",
+            workDayStart:new Date("2022-01-01 00:00:00"),
+            workDayEnd:new Date("2022-01-01 23:59:00"),
+            showWorkHours:false,
+            workWeekStart:1,
+            workWeekEnd:7,
+            allDaySlot: false,
+            dataSource: {
+                batch: true,
+
+                transport: {
+                    read: {
+                        url: "/admin/schedule/read",
+                        dataType: "jsonp"
+                    },
+                    update: {
+                        url: "/admin/schedule/update",
+                        dataType: "jsonp",
+                        type:"POST"
+                    },
+                    create: {
+                        url: "/admin/schedule/create",
+                        dataType: "jsonp",
+                        type:"POST"
+                    },
+                    destroy: {
+                        url: "/admin/schedule/destroy",
+                        dataType: "jsonp",
+                        type:"POST"
+                    },
+                    parameterMap: function (options, operation) {
+                        if (operation !== "read" && options.models) {
+                            return { models: kendo.stringify(options.models) };
+                        }
+                    }
+                },
+                schema: {
+                    model: {
+                        id: "scheduleID",
+                        fields: {
+                            scheduleID: { from: "id", type: "number" },
+                            title: { from: "title", defaultValue: "Tiêu đề", validation: { required: true } },
+                            start: { type: "date", from: "start_time" },
+                            end: { type: "date", from: "end_time" },
+                            date_plan: { type: "date", from: "date_plan" },
+                            description: { from: "description" },
+                            recurrenceId: { from: "recurrenceID" },
+                            recurrenceRule: { from: "recurrenceRule" },
+                            recurrenceException: { from: "recurrenceException" },
+                            equipment_id: { from: "equipment_id" },
+                            department_id: { from: "department_id" },
+                            plan_id: { from: "plan_id" },
+                            type_plan: { from: "type_plan" },
+                        }
+                    }
+                }
+            },
+            footer: false,
+            resources: [
+                 {
+                    field: "department_id",
+                    name: "Departments",
+                    dataColorField : "color",
+                    dataSource: departments,
+                    title: "Bộ phận"
+                },
+
+                {
+                    field: "equipment_id",
+                    name: "Equipments",
+                    dataSource: equipments,
+                    title: "Thiết bị"
+                },
+            ]
+        });
+
+        setInterval(function() {
+            $(".k-event,.k-task").each(function(){
+                var uid = $(this).data("uid");
+                var scheduler = $("#scheduler").data("kendoScheduler");
+                var dataItem = scheduler.occurrenceByUid(uid);
+                //console.log(dataItem);
+                if(dataItem.department_id != department_id){
+                    $(".k-event-delete",$(this)).remove();
+                }
+            })
+        }, 10);
+        schedule_filter();
+    });
+    function schedule_filter(){
+        var equipment_id = localStorage.getItem('equipment_id') || $("[name='equipment_select']").val();
+        var departments = $("[name='departments[]']").val();
+        var filters = [{
+            operator: "eq",
+            field: "equipment_id",
+            value: equipment_id
+        }];
+        if(departments.length){
+            filters.push({
+                logic: "or",
+                filters: $.map(departments, function (value) {
+                    return {
+                        operator: "eq",
+                        field: "department_id",
+                        value: value
+                    };
+                })
+            })
+        }
+        var filter = {
+            logic: "and",
+            filters: filters
+        };
+        var scheduler = $("#scheduler").data("kendoScheduler");
+        console.log(scheduler);
+        scheduler.dataSource.filter(filter);
+    }
+</script>
+
+}

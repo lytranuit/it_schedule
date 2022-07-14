@@ -1,0 +1,112 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Thông tin tài khoản";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+    Layout = "~/Views/Shared/_Admin.cshtml";
+}
+
+<h3>@ViewData["Title"]</h3>
+<partial name="_StatusMessage" for="StatusMessage" />
+<div class="row clearfix">
+    <div class="col-12">
+        <form method="POST" id="form-dang-tin">
+            <section class="card card-fluid">
+               
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group row">
+                                <b class="col-12 col-lg-2 col-form-label">Username:<i class="text-danger">*</i></b>
+                                <div class="col-12 col-lg-4 pt-1">
+
+                                    <input name="userName" placeholder="Username" class="form-control" disabled />
+                                </div>
+
+                                <b class="col-12 col-lg-2 col-form-label">Email:<i class="text-danger">*</i></b>
+                                <div class="col-12 col-lg-4 pt-1">
+                                    <input name="email"  placeholder="Email" class="form-control" disabled />
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <b class="col-12 col-lg-2 col-form-label">FirstName:<i class="text-danger">*</i></b>
+                                <div class="col-12 col-lg-4 pt-1">
+                                    <input class="form-control form-control-sm" type="text" name="firstName" placeholder="FirstName" />
+                                </div>
+
+                                <b class="col-12 col-lg-2 col-form-label">LastName:<i class="text-danger">*</i></b>
+                                <div class="col-12 col-lg-4 pt-1">
+                                    <input class="form-control form-control-sm price" type="text" name="lastName" required="" placeholder="LastName" />
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <b class="col-12 col-lg-2 col-form-label">FullName:<i class="text-danger">*</i></b>
+                                <div class="col-12 col-lg-4 pt-1">
+                                    <input class="form-control form-control-sm" type="text" name="fullName" placeholder="FullName" />
+                                </div>
+                                <b class="col-12 col-lg-2 col-form-label">Position:<i class="text-danger">*</i></b>
+                                <div class="col-12 col-lg-4 pt-1">
+                                    <input class="form-control form-control-sm" type="text" name="position" placeholder="Position" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group row">
+                                <div class="col-12">
+                                    <div class="card no-shadow border">
+                                        <div class="card-header">
+                                            Image
+                                        </div>
+                                        <div class="card-body text-center">
+                                            <div id="image_url" class="image_ft"></div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-12 pt-2">
+                                    <div class="card no-shadow border">
+                                        <div class="card-header">
+                                            Image Signature
+                                        </div>
+                                        <div class="card-body text-center">
+                                            <div id="image_sign" class="image_ft"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-inline-block w-100 text-center">
+                        <button type="submit" class="btn btn-sm btn-primary" style="width:200px">Save</button>
+                    </div>
+                </div>
+            </section>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<partial name="_ValidationScriptsPartial" />
+<script type="text/javascript">
+    var data = @Html.Raw(Json.Serialize(Model));
+    fillForm($("#form"),data);
+
+    $("#image_url").imageFeature({
+       'image':"/private/images/user.webp",
+    });
+    $("#image_sign").imageFeature({
+       'image':"/private/images/tick.png",
+    });
+    if (data.image_url) {
+        $("#image_url").imageFeature("set_image", data.image_url);
+    }
+    if (data.image_sign) {
+        $("#image_sign").imageFeature("set_image", data.image_sign);
+    }
+</script>
+
+}

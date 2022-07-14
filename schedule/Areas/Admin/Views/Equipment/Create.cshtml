@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Admin.cshtml";
+}
+<div class="row clearfix">
+    <div class="col-12">
+        <form method="POST" id="form-dang-tin" autocomplete="on">
+            <section class="card card-fluid">
+                <div class="card-header">
+                    <div class="d-inline-block w-100">
+                        <button type="submit" name="dangtin" class="btn btn-sm btn-primary float-right">Tạo mới</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="form-group row">
+                        <div class="col-lg-3 mt-2">
+                            <b class="col-form-label">Mã thiết bị:</b>
+                            <div class="pt-1">
+                                <input class="form-control form-control-sm" type='text' name="code" required="" placeholder="Mã thiết bị" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-lg-3 mt-2">
+                            <b class="col-form-label">Tên thiết bị:</b>
+                            <div class="pt-1">
+                                <input class="form-control form-control-sm" type='text' name="name" required="" placeholder="Tiếng Việt" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-lg-3 mt-2">
+                            <b class="col-form-label">Tên thiết bị:(EN)</b>
+                            <div class="pt-1">
+                                <input class="form-control form-control-sm" type='text' name="name_en" placeholder="Tiếng Anh" autocomplete="off" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-inline-block w-100">
+                        <button type="submit" name="dangtin" class="btn btn-sm btn-primary float-right">Tạo mới</button>
+                    </div>
+                </div>
+            </section>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}
+}
