@@ -1,19 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using it.Areas.Admin.Models;
 using it.Data;
 using System.Collections;
 using Microsoft.AspNetCore.Identity;
-using NPOI.XSSF.UserModel;
-using System.Text;
-using NPOI.SS.UserModel;
-using System.Text.RegularExpressions;
-using System.Globalization;
 using Microsoft.AspNetCore.Authorization;
 
 namespace it.Areas.Admin.Controllers
@@ -173,83 +164,6 @@ namespace it.Areas.Admin.Controllers
             var jsonData = new { draw = draw, recordsFiltered = recordsFiltered, recordsTotal = recordsTotal, data = data };
             return Json(jsonData);
         }
-        public async Task<IActionResult> import()
-        {
-            //return Ok();
-            FileStream fs = new FileStream("./private/excel/equipment/kho.xlsx", FileMode.Open);
-
-            // Khởi tạo workbook để đọc
-            XSSFWorkbook wb = new XSSFWorkbook(fs);
-            int numberofsheet = wb.NumberOfSheets;
-            Console.OutputEncoding = Encoding.UTF8; // để xuất ra console tv có dấu
-            Console.WriteLine("Thông tin từ file Excel");
-            for (var i = 0; i < numberofsheet; i++)
-            {
-                ISheet sheet = wb.GetSheetAt(i);
-
-                // đọc sheet này bắt đầu từ row 2 (0, 1 bỏ vì tiêu đề)
-
-                var lastrow = sheet.LastRowNum;
-                // nếu vẫn chưa gặp end thì vẫn lấy data
-                Console.WriteLine(lastrow);
-                for (int rowIndex = 6; rowIndex < lastrow; rowIndex++)
-                {
-                    // lấy row hiện tại
-                    var nowRow = sheet.GetRow(rowIndex);
-                    if (nowRow == null)
-                        continue;
-                    if (nowRow.Cells.All(d => d.CellType == CellType.Blank)) break;
-                    // vì ta dùng 3 cột A, B, C => data của ta sẽ như sau
-                    //int numcount = nowRow.Cells.Count;
-                    //for(int y = 0;y<numcount - 1 ;y++)
-                    var cellname = nowRow.GetCell(1);
-                    var cellcode = nowRow.GetCell(2);
-                    if (cellname == null || cellcode == null)
-                    {
-                        continue;
-                    }
-                    var code = "";
-                    var name = "";
-                    if (cellcode.CellType == CellType.String)
-                    {
-                        code = cellcode.StringCellValue;
-                    }
-                    else if (cellcode.CellType == CellType.Numeric)
-                    {
-                        code = cellcode.NumericCellValue.ToString();
-                    }
-                    if (cellname.CellType == CellType.String)
-                    {
-                        name = cellname.StringCellValue;
-                    }
-                    else if (cellname.CellType == CellType.Numeric)
-                    {
-                        name = cellname.NumericCellValue.ToString();
-                    }
-                    if (name == "" || code == "")
-                    {
-                        continue;
-                    }
-                    string pattern = "/\r\n|\n|\r/";
-                    Regex rgx = new Regex(pattern);
-                    var export_name = rgx.Split(name);
-                    var name_vn = name;
-                    var name_en = "";
-                    if (export_name.Length > 1)
-                    {
-                        name_vn = export_name[0];
-                        name_en = export_name[1];
-                    }
-                    // Xuất ra thông tin lên màn hình
-                    Console.WriteLine("MS: {0} ", code);
-                    Console.WriteLine("name: {0} ", name_vn);
-
-                    EquipmentModel EquipmentModel = new EquipmentModel { code = code, name = name_vn, name_en = name_en, created_at = DateTime.Now };
-                    _context.Add(EquipmentModel);
-                    _context.SaveChanges();
-                }
-            }
-            return Ok(1);
-        }
+       
     }
 }

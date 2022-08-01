@@ -12,6 +12,7 @@ namespace it.Areas.Admin.Models
         public string? name_en { get; set; }
         public string code { get; set; }
         public int? department_id { get; set; }
+        public string? sop_maintenance { get; set; }
         public DateTime? created_at { get; set; }
 
         public DateTime? updated_at { get; set; }

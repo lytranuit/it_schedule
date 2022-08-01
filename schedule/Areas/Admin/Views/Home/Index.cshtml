@@ -29,7 +29,7 @@
                         <div class="col-lg-6 mt-2">
                             <b class="col-form-label">Bộ phận:</b>
                             <div class="pt-1">
-                                @Html.DropDownList("departments[]", (IEnumerable<SelectListItem>)ViewData["departments"], new {multiple=true,data_placeholder = "Select",@class="multi_select" })
+                                @Html.DropDownList("departments[]", (IEnumerable<SelectListItem>)ViewData["departments"], new {multiple=true,data_placeholder = "Select",@class="" })
                             </div>
                         </div>
                     </div>
@@ -67,6 +67,7 @@
             <div data-container-for="start">
                 <input type="text"
                        data-role="datetimepicker"
+                       data-format="dd/MM/yyyy HH:mm:ss"
                        data-interval="15"
                        data-type="date"
                        data-bind="value:start"
@@ -77,7 +78,12 @@
         <div class="col-6">
             <label for="end">Kết thúc<i class="text-danger">*</i></label>
             <div data-container-for="end" class="">
-                <input type="text" data-type="date" data-role="datetimepicker" data-bind="value:end" name="end" data-datecompare-msg="End date should be greater than or equal to the start date" />
+                <input type="text"
+                       data-type="date"
+                       data-role="datetimepicker"
+                       data-format="dd/MM/yyyy HH:mm:ss"
+                       data-bind="value:end"
+                       name="end" data-datecompare-msg="End date should be greater than or equal to the start date" />
                 <span data-for="end" class="k-invalid-msg" style="display: none;"></span>
             </div>
         </div>
@@ -101,6 +107,7 @@
                 <input type="text"
                        data-role="datepicker"
                        data-type="date"
+                       data-format="dd/MM/yyyy"
                        data-bind="value:date_plan"
                        name="date_plan" />
                 <span data-for="date_plan" class="k-invalid-msg" style="display: none;"></span>
@@ -154,6 +161,13 @@
             enableFiltering:true,
             buttonWidth:"100%"
         });
+        $("[name='departments[]']").multiselect({
+            enableHTML:true,
+            enableFiltering:true,
+            buttonWidth:"100%",
+            includeSelectAllOption: true,
+           
+        });
         $("#scheduler").kendoScheduler({
             date: new Date(),
             height: 600,
@@ -161,7 +175,6 @@
             editable: {
                 template: $("#editor").html(),
                 editRecurringMode:function (e) {
-                    console.log(e);
                     if (e.department_id != department_id) {
                          return false;
                     }
@@ -328,7 +341,7 @@
             filters: filters
         };
         var scheduler = $("#scheduler").data("kendoScheduler");
-        console.log(scheduler);
+        //console.log(scheduler);
         scheduler.dataSource.filter(filter);
     }
 </script>

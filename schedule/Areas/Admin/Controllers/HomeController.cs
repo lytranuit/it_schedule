@@ -29,7 +29,7 @@ namespace it.Areas.Admin.Controllers
                 Value = a.id.ToString(),
                 Text = a.name
             }).ToList();
-            ViewData["equipments"] = _context.EquipmentModel.Where(u => u.deleted_at == null).Select(a => new SelectListItem()
+            ViewData["equipments"] = _context.EquipmentModel.Where(u => u.deleted_at == null).OrderBy(d => d.code).Select(a => new SelectListItem()
             {
                 Value = a.id.ToString(),
                 Text = a.code + " - " + a.name
