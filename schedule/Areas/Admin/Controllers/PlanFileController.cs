@@ -571,7 +571,7 @@ namespace it.Areas.Admin.Controllers
 
         public async Task<IActionResult> import(string department)
         {
-            return Ok();
+            //return Ok();
 
             // Khởi tạo workbook để đọc
             Spire.Xls.Workbook workbook = new Workbook();
@@ -655,13 +655,13 @@ namespace it.Areas.Admin.Controllers
                     MyMonth MyMonth = item.Value;
                     if (MyMonth.plan_date == null || MyMonth.plan_date == "")
                         continue;
-                    DateTime date_plan = new DateTime(2022, MyMonth.month, Int32.Parse(MyMonth.plan_date));
+                    DateTime date_plan = new DateTime(2022, MyMonth.month, Int32.Parse(MyMonth.plan_date), 8, 0, 0);
                     DateTimeOffset start_time = new DateTimeOffset(date_plan, new TimeSpan(7, 0, 0));
-                    DateTimeOffset end_time = new DateTimeOffset(date_plan.AddHours(1), new TimeSpan(7, 0, 0));
+                    DateTimeOffset end_time = new DateTimeOffset(date_plan.AddHours(4), new TimeSpan(7, 0, 0));
                     ScheduleModel ScheduleModel = new ScheduleModel
                     {
                         created_at = DateTime.Now,
-                        title = "LỊCH BẢO TRÌ ĐỊNH KỲ",
+                        title = "Bảo trì định kỳ",
                         type_plan = MyMonth.plan_type,
                         date_plan = date_plan,
                         equipment_id = EquipmentModel.id,
@@ -680,7 +680,7 @@ namespace it.Areas.Admin.Controllers
 
         public async Task<IActionResult> importtime(string department)
         {
-            return Ok();
+            //return Ok();
 
             // Khởi tạo workbook để đọc
             Spire.Xls.Workbook workbook = new Workbook();
@@ -776,7 +776,7 @@ namespace it.Areas.Admin.Controllers
 
         public async Task<IActionResult> importbackup(string department)
         {
-            return Ok();
+            //return Ok();
 
             // Khởi tạo workbook để đọc
             Spire.Xls.Workbook workbook = new Workbook();

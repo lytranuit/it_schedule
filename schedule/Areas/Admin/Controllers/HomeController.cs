@@ -24,7 +24,9 @@ namespace it.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            ViewData["plans"] = _context.PlanModel.Where(u => u.deleted_at == null).Select(a => new SelectListItem()
+
+            var user = await UserManager.GetUserAsync(this.User);
+            ViewData["plans"] = _context.PlanModel.Where(u => u.deleted_at == null && user.department_id == u.department_id).Select(a => new SelectListItem()
             {
                 Value = a.id.ToString(),
                 Text = a.name
@@ -33,6 +35,30 @@ namespace it.Areas.Admin.Controllers
             {
                 Value = a.id.ToString(),
                 Text = a.code + " - " + a.name
+            }).ToList();
+            ViewData["departments"] = _context.DepartmentModel.Where(u => u.deleted_at == null).Select(a => new MySelect()
+            {
+                Value = a.id.ToString(),
+                Text = "<i style='background:" + a.color + "' class='color_i'></i>" + a.name,
+                Selected = true,
+                Color = a.color
+            }).ToList();
+            return View();
+        }
+
+        public async Task<IActionResult> Timeline()
+        {
+
+            var user = await UserManager.GetUserAsync(this.User);
+            ViewData["plans"] = _context.PlanModel.Where(u => u.deleted_at == null && user.department_id == u.department_id).Select(a => new SelectListItem()
+            {
+                Value = a.id.ToString(),
+                Text = a.name
+            }).ToList();
+            ViewData["equipments"] = _context.EquipmentModel.Where(u => u.deleted_at == null).OrderBy(d => d.code).Select(a => new SelectListItem()
+            {
+                Value = a.id.ToString(),
+                Text = a.code
             }).ToList();
             ViewData["departments"] = _context.DepartmentModel.Where(u => u.deleted_at == null).Select(a => new MySelect()
             {
