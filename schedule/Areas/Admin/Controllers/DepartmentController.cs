@@ -51,7 +51,7 @@ namespace it.Areas.Admin.Controllers
             {
                 DepartmentModel.created_at = DateTime.Now;
                 _context.Add(DepartmentModel);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
                 return RedirectToAction(nameof(Index));
             }
             return Ok(ModelState);
@@ -112,7 +112,7 @@ namespace it.Areas.Admin.Controllers
                         }
                     }
                     _context.Update(DepartmentModel_old);
-                    await _context.SaveChangesAsync();
+                    _context.SaveChanges();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -138,7 +138,7 @@ namespace it.Areas.Admin.Controllers
                 _context.DepartmentModel.Update(DepartmentModel);
             }
 
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             return RedirectToAction(nameof(Index));
         }
 

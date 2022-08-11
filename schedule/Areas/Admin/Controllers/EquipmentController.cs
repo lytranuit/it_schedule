@@ -43,7 +43,7 @@ namespace it.Areas.Admin.Controllers
             {
                 EquipmentModel.created_at = DateTime.Now;
                 _context.Add(EquipmentModel);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
                 return RedirectToAction(nameof(Index));
             }
             return Ok(ModelState);
@@ -98,7 +98,7 @@ namespace it.Areas.Admin.Controllers
                         }
                     }
                     _context.Update(EquipmentModel_old);
-                    await _context.SaveChangesAsync();
+                    _context.SaveChanges();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -124,7 +124,7 @@ namespace it.Areas.Admin.Controllers
                 _context.EquipmentModel.Update(EquipmentModel);
             }
 
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             return RedirectToAction(nameof(Index));
         }
 

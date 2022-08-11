@@ -80,7 +80,7 @@ namespace it.Areas.Admin.Controllers
             {
                 PlanFileModel.created_at = DateTime.Now;
                 _context.Add(PlanFileModel);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
 
                 var equips = new List<PlanFileEquipmentModel>();
                 //ADD equipments
@@ -96,7 +96,7 @@ namespace it.Areas.Admin.Controllers
                         equips.Add(PlanFileEquipmentModel);
                         _context.Add(PlanFileEquipmentModel);
                     }
-                    await _context.SaveChangesAsync();
+                    _context.SaveChanges();
                 }
                 PlanFileModel.equipments = equips;
                 ///WRITE TO EXCEL
@@ -519,7 +519,7 @@ namespace it.Areas.Admin.Controllers
                 PlanFileModel.deleted_at = DateTime.Now;
                 _context.PlanFileModel.Update(PlanFileModel);
             }
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             return RedirectToAction(nameof(Index), new { id = PlanFileModel.plan_id });
         }
 

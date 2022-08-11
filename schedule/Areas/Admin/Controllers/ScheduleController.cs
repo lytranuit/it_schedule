@@ -76,7 +76,7 @@ namespace it.Areas.Admin.Controllers
                         }
                     }
                     _context.Update(ScheduleModel_old);
-                    await _context.SaveChangesAsync();
+                    _context.SaveChanges();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -102,7 +102,7 @@ namespace it.Areas.Admin.Controllers
                 _context.ScheduleModel.Update(ScheduleModel);
             }
 
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             return RedirectToAction(nameof(Index));
         }
 
@@ -186,7 +186,7 @@ namespace it.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public ContentResult Update(string callback, string models)
+        public async Task<ContentResult> Update(string callback, string models)
         {
             var list = JsonConvert.DeserializeObject<List<ScheduleModel>>(models);
             foreach (var model in list)
@@ -195,6 +195,7 @@ namespace it.Areas.Admin.Controllers
                 model.date_plan = model.date_plan + new TimeSpan(7, 0, 0);
                 _context.Update(model);
             }
+
             _context.SaveChanges();
 
             return Content(String.Format("{0}({1});",

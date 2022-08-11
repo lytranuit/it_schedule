@@ -51,7 +51,7 @@ namespace it.Areas.Admin.Controllers
             {
                 PlanModel.created_at = DateTime.Now;
                 _context.Add(PlanModel);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
                 return RedirectToAction(nameof(Index));
             }
             return Ok(ModelState);
@@ -143,7 +143,7 @@ namespace it.Areas.Admin.Controllers
                         }
                     }
                     _context.Update(PlanModel_old);
-                    await _context.SaveChangesAsync();
+                    _context.SaveChanges();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -169,7 +169,7 @@ namespace it.Areas.Admin.Controllers
                 _context.PlanModel.Update(PlanModel);
             }
 
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             return RedirectToAction(nameof(Index));
         }
 

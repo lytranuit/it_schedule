@@ -65,12 +65,12 @@
             </div>
         </div>
         <div class="col-6">
-            <label for="start">Bắt đầu<i class="text-danger">*</i></label>
+            <label for="start">Bắt đầu thực tế<i class="text-danger">*</i></label>
             <div data-container-for="start">
                 <input type="text"
                        data-role="datetimepicker"
-                       data-format="dd/MM/yyyy HH:mm:ss"
-                       data-interval="15"
+                       data-format="dd/MM/yyyy HH:mm"
+                       data-interval="1"
                        data-type="date"
                        data-bind="value:start"
                        name="start" />
@@ -78,12 +78,13 @@
             </div>
         </div>
         <div class="col-6">
-            <label for="end">Kết thúc<i class="text-danger">*</i></label>
+            <label for="end">Kết thúc thực tế<i class="text-danger">*</i></label>
             <div data-container-for="end" class="">
                 <input type="text"
                        data-type="date"
                        data-role="datetimepicker"
-                       data-format="dd/MM/yyyy HH:mm:ss"
+                       data-format="dd/MM/yyyy HH:mm"
+                       data-interval="1"
                        data-bind="value:end"
                        name="end" data-datecompare-msg="End date should be greater than or equal to the start date" />
                 <span data-for="end" class="k-invalid-msg" style="display: none;"></span>
@@ -95,7 +96,7 @@
                 <div data-bind="value:recurrenceRule" name="recurrenceRule" data-role="recurrenceeditor"></div>
             </div>
         </div>
-        
+
         @if(plans.Count > 0){
         <div class="col-4">
             <label for="plan_id">Kế hoạch</label>
@@ -318,6 +319,10 @@
                 //console.log(dataItem);
                 if(dataItem.department_id != department_id){
                     $(".k-event-delete",$(this)).remove();
+                }
+                var current_date = new Date();
+                if(dataItem.end >= current_date){
+                    $(this).css("filter","opacity(50%)");
                 }
             })
         }, 10);

@@ -15,17 +15,24 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using it.Areas.Admin.Models;
+using it.Data;
+
 namespace it.Areas.Identity.Pages.Account
 {
     public class LoginModel : PageModel
     {
         private readonly SignInManager<UserModel> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private UserManager<UserModel> UserManager;
 
-        public LoginModel(SignInManager<UserModel> signInManager, ILogger<LoginModel> logger)
+        protected readonly ItContext _context;
+
+        public LoginModel(SignInManager<UserModel> signInManager, ILogger<LoginModel> logger, ItContext context, UserManager<UserModel> UserMgr)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _context = context;
+            UserManager = UserMgr;
         }
 
         /// <summary>
@@ -114,6 +121,15 @@ namespace it.Areas.Identity.Pages.Account
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
+                    /// Audittrail
+                    var user = _context.UserModel.Where(x => x.Email == Input.Email).FirstOrDefault();
+                    var audit = new AuditTrailsModel();
+                    audit.UserId = user.Id;
+                    audit.Type = AuditType.Login.ToString();
+                    audit.DateTime = DateTime.Now;
+                    _context.Add(audit);
+                    _context.SaveChanges();
+                    ////
                     _logger.LogInformation("User logged in.");
                     return LocalRedirect(returnUrl);
                 }
@@ -128,6 +144,14 @@ namespace it.Areas.Identity.Pages.Account
                 }
                 else
                 {
+                    /// Audittrail
+                    var audit = new AuditTrailsModel();
+                    audit.Type = AuditType.LoginFailed.ToString();
+                    audit.DateTime = DateTime.Now;
+                    audit.NewValues = Input.Email;
+                    _context.Add(audit);
+                    _context.SaveChanges();
+                    ////
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return Page();
                 }

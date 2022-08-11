@@ -5,6 +5,7 @@
 using System;
 using System.Threading.Tasks;
 using it.Areas.Admin.Models;
+using it.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,15 +19,29 @@ namespace it.Areas.Identity.Pages.Account
         private readonly SignInManager<UserModel> _signInManager;
         private readonly ILogger<LogoutModel> _logger;
 
-        public LogoutModel(SignInManager<UserModel> signInManager, ILogger<LogoutModel> logger)
+        private UserManager<UserModel> UserManager;
+        protected readonly ItContext _context;
+        public LogoutModel(SignInManager<UserModel> signInManager, ILogger<LogoutModel> logger, ItContext context, UserManager<UserModel> UserMgr)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _context = context;
+            UserManager = UserMgr;
         }
 
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
             await _signInManager.SignOutAsync();
+            /// Audittrail
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            string user_id = UserManager.GetUserId(currentUser); // Get user id:
+            var audit = new AuditTrailsModel();
+            audit.UserId = user_id;
+            audit.Type = AuditType.Logout.ToString();
+            audit.DateTime = DateTime.Now;
+            _context.Add(audit);
+            _context.SaveChanges();
+            ////
             _logger.LogInformation("User logged out.");
             if (returnUrl != null)
             {

@@ -58,12 +58,12 @@
             </div>
         </div>
         <div class="col-6">
-            <label for="start">Bắt đầu<i class="text-danger">*</i></label>
+            <label for="start">Bắt đầu thực tế<i class="text-danger">*</i></label>
             <div data-container-for="start">
                 <input type="text"
                        data-role="datetimepicker"
-                       data-format="dd/MM/yyyy HH:mm:ss"
-                       data-interval="15"
+                       data-format="dd/MM/yyyy HH:mm"
+                       data-interval="1"
                        data-type="date"
                        data-bind="value:start"
                        name="start" />
@@ -71,12 +71,13 @@
             </div>
         </div>
         <div class="col-6">
-            <label for="end">Kết thúc<i class="text-danger">*</i></label>
+            <label for="end">Kết thúc thực tế<i class="text-danger">*</i></label>
             <div data-container-for="end" class="">
                 <input type="text"
                        data-type="date"
                        data-role="datetimepicker"
-                       data-format="dd/MM/yyyy HH:mm:ss"
+                       data-format="dd/MM/yyyy HH:mm"
+                       data-interval="1"
                        data-bind="value:end"
                        name="end" data-datecompare-msg="End date should be greater than or equal to the start date" />
                 <span data-for="end" class="k-invalid-msg" style="display: none;"></span>
@@ -140,6 +141,7 @@
     var equipments = @Html.Raw(Json.Serialize(ViewData["equipments"]));
     var departments = @Html.Raw(Json.Serialize(ViewData["departments"]));
     var department_id = @department_id;
+    var is_load = false;
     $(document).ready(function(){
         $("[name='departments[]']").change(function (e) {
             schedule_filter();
@@ -173,8 +175,6 @@
             views: [
                 {
                     type: "timeline", title:'Timeline'
-                }, {
-                    type: "timelineWeek", title:'Timeline Week'
                 },
                 {
                     type: "timelineMonth", title:'Timeline Month'
@@ -205,7 +205,6 @@
                 }
             },
             moveStart:function(e){
-                console.log(e);
                 if(e.event.department_id != department_id){
                      e.preventDefault();
                 }
@@ -267,7 +266,27 @@
                 }
             },
             footer: false,
+            dataBound:function(e){
+                if(!is_load){
+                    is_load = true;
+                    var data = e.sender._data;
+                    var equipment_list = data.map(function(item){
+                        return item.equipment_id;
+                    })
 
+                    var scheduler = $("#scheduler").data("kendoScheduler");
+                    var equip = equipments.filter(e=> equipment_list.indexOf(parseInt(e.value)) != "-1");
+                    scheduler.resources[1].dataSource.data(equip);
+                    $(".preloader").fadeOut();
+                }
+            },
+            navigate:function(e){
+                //console.log("navigate");
+                $(".preloader").fadeIn();
+                var scheduler = $("#scheduler").data("kendoScheduler");
+                scheduler.resources[1].dataSource.data(equipments);
+                is_load = false;
+            },
             group: {
                 resources: ["Equipments"],
                 orientation: "vertical"
@@ -280,7 +299,7 @@
                     dataSource: departments,
                     title: "Bộ phận"
                 },
-                  {
+                {
                     field: "equipment_id",
                     name: "Equipments",
                     dataSource: equipments,
@@ -298,14 +317,24 @@
                 if(dataItem.department_id != department_id){
                     $(".k-event-delete",$(this)).remove();
                 }
+                var current_date = new Date();
+                if(dataItem.end >= current_date){
+                    $(this).css("filter","opacity(50%)");
+                }
             })
         }, 10);
         schedule_filter();
     });
     function schedule_filter(){
+        $(".preloader").show();
+        var scheduler = $("#scheduler").data("kendoScheduler");
+        scheduler.resources[1].dataSource.data(equipments);
+        is_load = false;
+
         var departments = $("[name='departments[]']").val();
         var filters = [];
         if(departments.length){
+
             filters.push({
                 logic: "or",
                 filters: $.map(departments, function (value) {
@@ -321,9 +350,9 @@
             logic: "and",
             filters: filters
         };
-        var scheduler = $("#scheduler").data("kendoScheduler");
         //console.log(scheduler);
         scheduler.dataSource.filter(filter);
+        is_load = false;
     }
 </script>
 
