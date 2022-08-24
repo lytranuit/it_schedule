@@ -1,0 +1,93 @@
+﻿@{
+	ViewData["Title"] = "Index";
+	Layout = "~/Views/Shared/_Admin.cshtml";
+}
+@if (TempData["StatusMessage"] != null)
+{
+	<div class="alert alert-success icon-custom-alert">
+		<i class="mdi mdi-check alert-icon"></i>
+		<div class="alert-text">
+			@TempData["StatusMessage"]
+		</div>
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+			<span aria-hidden="true"><i class="mdi mdi-close"></i></span>
+		</button>
+	</div>
+}
+<div class="row clearfix">
+	<div class="col-12">
+		<form method="POST" id="form">
+			<section class="card card-fluid">
+				<div class="card-body">
+					<div class="row">
+						<div class="col-md-8">
+							<div class="form-group row">
+								<b class="col-12 col-lg-2 col-form-label">Tài khoản:<i class="text-danger">*</i></b>
+								<div class="col-12 col-lg-10 pt-1">
+
+									<input name="userName" placeholder="Username" class="form-control" readonly />
+								</div>
+							</div>
+							<div class="form-group row">
+								<b class="col-12 col-lg-2 col-form-label">Email:<i class="text-danger">*</i></b>
+								<div class="col-12 col-lg-10 pt-1">
+									<input name="email" placeholder="Email" class="form-control" readonly />
+								</div>
+							</div>
+
+							<div class="form-group row">
+								<b class="col-12 col-lg-2 col-form-label">Họ và tên:<i class="text-danger">*</i></b>
+								<div class="col-12 col-lg-10 pt-1">
+									<input class="form-control form-control-sm" type="text" name="fullName" placeholder="FullName" />
+								</div>
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="form-group row">
+								<div class="col-12">
+									<div class="card no-shadow border">
+										<div class="card-header">
+											Hình đại diện
+										</div>
+										<div class="card-body text-center">
+											<div id="image_url" class="image_ft"></div>
+										</div>
+
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="card-footer">
+					<div class="d-inline-block w-100 text-center">
+						<button type="submit" class="btn btn-sm btn-primary" style="width:200px">Cập nhật</button>
+
+					</div>
+				</div>
+			</section>
+		</form>
+	</div>
+</div>
+<link type="text/css" href="/lib/jquery.signature/css/jquery.signature.css" rel="stylesheet">
+@section Scripts{
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+
+	<link href="~/lib/elfinder/css/admin.min.css" rel="stylesheet" />
+	<script type="text/javascript">
+    var data = @Html.Raw(Json.Serialize(Model));
+
+    $("#image_url").imageFeature({
+       'image':"/private/images/user.webp",
+    });
+    if (data.image_url) {
+        $("#image_url").imageFeature("set_image", data.image_url);
+    }
+    $(document).ready(function(){
+        fillForm($("#form"),data);
+    })
+	</script>
+
+}
