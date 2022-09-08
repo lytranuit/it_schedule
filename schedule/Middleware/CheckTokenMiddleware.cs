@@ -18,14 +18,31 @@ namespace schedule.Middleware
         {
 
             bool islogin = httpContext.User.Identity.IsAuthenticated;
-            //Console.WriteLine("CheckTokebMiddleware: " + islogin);
+            string Token = _httpContextAccessor.HttpContext.Request.Cookies["Auth-Token"];
+            var path = (string)_httpContextAccessor.HttpContext.Request.Path;
+            var except = new List<string>()
+            {
+                "/Identity/Account/AccessDenied",
+                "/Identity/Account/Logout",
+                "/Home/RemoveSignIn"
+            };
+            foreach (var item in except)
+            {
+                if (path.ToLower().Contains(item.ToLower()))
+                {
+                    islogin = true;
+                    break;
+                }
+            }
+            //Console.WriteLine("Path: " + path);
+            //Console.WriteLine("CheckLogin: " + islogin);
             if (islogin)
             {
                 await _next(httpContext);
             }
             else
             {
-                string Token = _httpContextAccessor.HttpContext.Request.Cookies["Auth-Token"];
+                //Console.WriteLine("CheckTokebMiddleware: " + Token);
                 if (Token != null)
                 {
                     var find = _contextToken.TokenModel.Where(d => d.token == Token && d.vaild_to > DateTime.Now && d.deleted_at == null).FirstOrDefault();
@@ -37,9 +54,13 @@ namespace schedule.Middleware
                         {
                             await _signInManager.SignInAsync(user, true);
                         }
+                        else
+                        {
+
+                            httpContext.Response.Redirect("/Identity/Account/AccessDenied");
+                        }
                     }
                 }
-                Console.WriteLine("CheckTokebMiddleware: " + Token);
                 await _next(httpContext);
             }
 
