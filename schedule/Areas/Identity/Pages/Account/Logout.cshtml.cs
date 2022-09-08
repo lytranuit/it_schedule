@@ -21,12 +21,14 @@ namespace it.Areas.Identity.Pages.Account
 
         private UserManager<UserModel> UserManager;
         protected readonly ItContext _context;
-        public LogoutModel(SignInManager<UserModel> signInManager, ILogger<LogoutModel> logger, ItContext context, UserManager<UserModel> UserMgr)
+        private readonly IConfiguration _configuration;
+        public LogoutModel(SignInManager<UserModel> signInManager, ILogger<LogoutModel> logger, ItContext context, UserManager<UserModel> UserMgr, IConfiguration configuration)
         {
             _signInManager = signInManager;
             _logger = logger;
             _context = context;
             UserManager = UserMgr;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> OnPost(string returnUrl = null)
@@ -41,7 +43,12 @@ namespace it.Areas.Identity.Pages.Account
             audit.DateTime = DateTime.Now;
             _context.Add(audit);
             _context.SaveChanges();
-            ////
+            ////Remove Cookie
+            Response.Cookies.Delete(_configuration["JWT:NameCookieAuth"], new CookieOptions()
+            {
+                Domain = _configuration["JWT:Domain"]
+            });
+            ///
             _logger.LogInformation("User logged out.");
             if (returnUrl != null)
             {

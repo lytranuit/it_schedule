@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.FileProviders;
 using System.Net;
 using System.Text.Json.Serialization;
+using schedule.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'IdentityContextConnection' not found.");
+var connectionStringToken = builder.Configuration.GetConnectionString("TokenConnection") ?? throw new InvalidOperationException("Connection string 'TokenContextConnection' not found.");
 
 builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 builder.Services.AddDbContext<IdentityContext>(options =>
@@ -20,10 +22,12 @@ builder.Services.AddDefaultIdentity<UserModel>(options => options.SignIn.Require
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddJsonOptions(x =>
    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+builder.Services.AddDbContext<TokenContext>(options =>
+  options.UseSqlServer(connectionStringToken)
+  );
 builder.Services.AddDbContext<ItContext>(options =>
   options.UseSqlServer(connectionString)
   );
-
 //builder.Services.AddAuthorization(options =>
 //{
 //    options.FallbackPolicy = new AuthorizationPolicyBuilder()
@@ -78,7 +82,6 @@ else
 {
     app.UseDeveloperExceptionPage();
 }
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -86,6 +89,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseMiddleware<CheckTokenMiddleware>();
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
