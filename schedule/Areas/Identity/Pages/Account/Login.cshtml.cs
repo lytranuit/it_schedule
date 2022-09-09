@@ -28,13 +28,15 @@ namespace it.Areas.Identity.Pages.Account
         private UserManager<UserModel> UserManager;
 
         protected readonly ItContext _context;
+        private readonly IConfiguration _configuration;
 
-        public LoginModel(SignInManager<UserModel> signInManager, ILogger<LoginModel> logger, ItContext context, UserManager<UserModel> UserMgr)
+        public LoginModel(SignInManager<UserModel> signInManager, ILogger<LoginModel> logger, ItContext context, UserManager<UserModel> UserMgr, IConfiguration configuration)
         {
             _signInManager = signInManager;
             _logger = logger;
             _context = context;
             UserManager = UserMgr;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -126,17 +128,28 @@ namespace it.Areas.Identity.Pages.Account
                     .Add(new MediaTypeWithQualityHeaderValue("application/json"));//ACCEPT header
                 var values = new Dictionary<string, string>
                 {
-                    { "user", Input.Email },
+                    { "email", Input.Email },
                     { "password", Input.Password }
                 };
                 var content = new FormUrlEncodedContent(values);
-                var url = "https://mail.pymepharco.com/WorldClientAPI/authenticate/basic";
+                var url = _configuration["JWT:ValidIssuer"] + "/api/login";
                 var response = await client.PostAsync(url, content);
                 LoginResponse responseJson = await response.Content.ReadFromJsonAsync<LoginResponse>();
                 var pass = Input.Password;
                 if (responseJson.authed == true)
                 {
                     pass = "!PMP_it123456";
+                    var token_string = responseJson.token;
+                    ////
+                    Response.Cookies.Append(
+                        _configuration["JWT:NameCookieAuth"],
+                        token_string,
+                        new CookieOptions()
+                        {
+                            Domain = _configuration["JWT:Domain"],
+                            Expires = DateTime.Now.AddHours(Int64.Parse(_configuration["JWT:Expire"]))
+                        }
+                    );
                 }
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, pass, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
@@ -192,5 +205,6 @@ namespace it.Areas.Identity.Pages.Account
 
         public string? session { get; set; }
         public string? user { get; set; }
+        public string? token { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using it.Areas.Admin.Models;
 using it.Data;
 using Microsoft.AspNetCore.Identity;
+using System.Net.Http.Headers;
 
 namespace schedule.Middleware
 {
@@ -14,7 +15,7 @@ namespace schedule.Middleware
             _next = next;
             _httpContextAccessor = httpContextAccessor;
         }
-        public async Task Invoke(HttpContext httpContext, ItContext _context, TokenContext _contextToken, SignInManager<UserModel> _signInManager)
+        public async Task Invoke(HttpContext httpContext, ItContext _context, TokenContext _contextToken, SignInManager<UserModel> _signInManager, IConfiguration _configuration)
         {
 
             bool islogin = httpContext.User.Identity.IsAuthenticated;
@@ -28,7 +29,7 @@ namespace schedule.Middleware
             };
             foreach (var item in except)
             {
-                if (path.ToLower().Contains(item.ToLower()))
+                if (path.ToLower().StartsWith(item.ToLower()))
                 {
                     islogin = true;
                     break;
@@ -45,10 +46,16 @@ namespace schedule.Middleware
                 //Console.WriteLine("CheckTokebMiddleware: " + Token);
                 if (Token != null)
                 {
-                    var find = _contextToken.TokenModel.Where(d => d.token == Token && d.vaild_to > DateTime.Now && d.deleted_at == null).FirstOrDefault();
-                    if (find != null)
+                    var client = new HttpClient();
+
+                    client.DefaultRequestHeaders.Accept
+                        .Add(new MediaTypeWithQualityHeaderValue("application/json"));//ACCEPT header
+                    var url = _configuration["JWT:ValidIssuer"] + "/api/tokeninfo?token=" + Token;
+                    var response = await client.GetAsync(url);
+                    InfoResponse responseJson = await response.Content.ReadFromJsonAsync<InfoResponse>();
+                    if (responseJson.success)
                     {
-                        var email = find.email;
+                        var email = responseJson.email;
                         var user = _context.UserModel.Where(d => d.Email == email).FirstOrDefault();
                         if (user != null)
                         {
@@ -56,7 +63,6 @@ namespace schedule.Middleware
                         }
                         else
                         {
-
                             httpContext.Response.Redirect("/Identity/Account/AccessDenied");
                         }
                     }
@@ -65,5 +71,10 @@ namespace schedule.Middleware
             }
 
         }
+    }
+    public class InfoResponse
+    {
+        public bool success { get; set; }
+        public string? email { get; set; }
     }
 }
